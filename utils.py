@@ -43,15 +43,29 @@ def write_csv(curr_file, rel_path, delimiter=',', to_dump=None):
 			csv_writer.writerow(row)
 	data_file.close()
 
-def filter_by_ext(l, ext):
-	for i in l:
-		if i.endswith(ext):
-			yield i
+def filter_by_name_frags(name, name_frags):
+	last_idx = -1
+	for i, frag in enumerate(name_frags):
+		try:
+			new_idx = name.index(frag)
+			print(new_idx)
+			if new_idx < last_idx:
+				break
+			last_idx = new_idx
+			if i == len(name_frags) - 1:
+				yield name
+		except ValueError:
+			break
 
-def all_files_with_ext(curr_file, path_to_dir, ext):
+def filter_list_by_name_frags(l, name_frags):
+	for name in l:
+		for matching_name in filter_by_name_frags(name, name_frags):
+			yield matching_name
+
+def all_files_with_name_frags(curr_file, path_to_dir, name_frags):
 	path_to_dir = file_path(curr_file, path_to_dir)
 	all_files = os.listdir(path_to_dir)
-	return [f for f in filter_by_ext(all_files, ext)]
+	return [f for f in filter_list_by_name_frags(all_files, name_frags)]
 
 def add_matrix(dest, mat):
 	for i, l in enumerate(mat):
@@ -66,8 +80,8 @@ def normalize_matrix(mat, norming_factor):
 def read_matrix_file(curr_file, path, name):
 	return read_csv(curr_file, os.path.join(path, name), preprocess=preprocess)
 
-def average_files(curr_file, path_to_dir, ext):
-	files = all_files_with_ext(curr_file, path_to_dir, ext)
+def average_files(curr_file, path_to_dir, name_frags):
+	files = all_files_with_ext(curr_file, path_to_dir, name_frags)
 	if len(files) < 1:
 		raise 'There should be more than 0 files'
 	print('FILE: %s' % files[0])
