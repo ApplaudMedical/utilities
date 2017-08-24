@@ -44,14 +44,12 @@ def write_csv(curr_file, rel_path, delimiter=',', to_dump=None):
 	data_file.close()
 
 def filter_by_name_frags(name, name_frags):
-	last_idx = -1
+	working_name = name
 	for i, frag in enumerate(name_frags):
 		try:
-			new_idx = name.index(frag)
-			print(new_idx)
-			if new_idx < last_idx:
-				break
-			last_idx = new_idx
+			idx = name.index(frag)
+			if idx < len(working_name) - 2
+				working_name = working_name[idx+1:]
 			if i == len(name_frags) - 1:
 				yield name
 		except ValueError:
@@ -81,7 +79,7 @@ def read_matrix_file(curr_file, path, name):
 	return read_csv(curr_file, os.path.join(path, name), preprocess=preprocess)
 
 def average_files(curr_file, path_to_dir, name_frags):
-	files = all_files_with_ext(curr_file, path_to_dir, name_frags)
+	files = all_files_with_name_frags(curr_file, path_to_dir, name_frags)
 	if len(files) < 1:
 		raise 'There should be more than 0 files'
 	print('FILE: %s' % files[0])
