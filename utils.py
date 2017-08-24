@@ -60,9 +60,12 @@ def filter_list_by_name_frags(l, name_frags):
 		for matching_name in filter_by_name_frags(name, name_frags):
 			yield matching_name
 
-def all_files_with_name_frags(curr_file, path_to_dir, name_frags):
+def all_files_from_dir(curr_file, path_to_dir):
 	path_to_dir = file_path(curr_file, path_to_dir)
-	all_files = os.listdir(path_to_dir)
+	return os.listdir(path_to_dir)
+
+def all_files_with_name_frags(curr_file, path_to_dir, name_frags):
+	all_files = all_files_from_dir(curr_file, path_to_dir)
 	return [f for f in filter_list_by_name_frags(all_files, name_frags)]
 
 def add_matrix(dest, mat):
@@ -78,14 +81,26 @@ def normalize_matrix(mat, norming_factor):
 def read_matrix_file(curr_file, path, name):
 	return read_csv(curr_file, os.path.join(path, name), preprocess=preprocess)
 
-def average_files(curr_file, path_to_dir, name_frags):
-	files = all_files_with_name_frags(curr_file, path_to_dir, name_frags)
+def average_files(curr_file, path_to_dir, name_frags, files=None, print_on=False):
+	if files is None:
+		files = all_files_with_name_frags(curr_file, path_to_dir, name_frags)
+	else:
+		files = [f for f in filter_list_by_name_frags(files, name_frags)]
 	if len(files) < 1:
 		raise 'There should be more than 0 files'
-	print('FILE: %s' % files[0])
-	initial = read_matrix_file(curr_file, path_to_dir, files[0])
+	if print_on:
+		print('FILE: %s' % files[0])
+	result = read_matrix_file(curr_file, path_to_dir, files[0])
 	for i in range(1, len(files)):
-		print('FILE: %s' % files[i])
-		add_matrix(initial, read_matrix_file(curr_file, path_to_dir, files[i]))
-	normalize_matrix(initial, len(files))
-	return initial
+		if print_on:
+			print('FILE: %s' % files[i])
+		add_matrix(result, read_matrix_file(curr_file, path_to_dir, files[i]))
+	normalize_matrix(result, len(files))
+	return (result, files)
+
+def batch_average_files(curr_file, path_to_dir, name_frag_sets):
+	search_pool = all_files_from_dir(curr_file, path_to_dir)
+	for name_frags in name_frag_sets:
+		(averaged, files_used) = average_files(curr_file, path_to_dir, name_frags, files=search_pool)
+		yield averaged
+		search_pool = [f for f in search_pool if f not in files_used]
