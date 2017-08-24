@@ -47,8 +47,9 @@ def filter_by_name_frags(name, name_frags):
 	working_name = name
 	for i, frag in enumerate(name_frags):
 		try:
+			print(working_name)
 			idx = name.index(frag)
-			if idx < len(working_name) - 2
+			if idx <= len(working_name) - 2:
 				working_name = working_name[idx+1:]
 			if i == len(name_frags) - 1:
 				yield name
