@@ -44,6 +44,8 @@ def write_csv(curr_file, rel_path, delimiter=',', to_dump=None):
 	data_file.close()
 
 def filter_by_name_frags(name, name_frags):
+	if len(name_frags) == 0:
+		yield name
 	working_name = name
 	for i, frag in enumerate(name_frags):
 		try:
@@ -81,7 +83,7 @@ def normalize_matrix(mat, norming_factor):
 def read_matrix_file(curr_file, path, name):
 	return read_csv(curr_file, os.path.join(path, name), preprocess=preprocess)
 
-def average_files(curr_file, path_to_dir, name_frags, files=None, print_on=False):
+def average_files(curr_file, path_to_dir, name_frags=[], files=None, print_on=False):
 	if files is None:
 		files = all_files_with_name_frags(curr_file, path_to_dir, name_frags)
 	else:
