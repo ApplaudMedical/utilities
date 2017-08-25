@@ -2,6 +2,7 @@
 
 import csv
 import os
+import functools
 
 def file_path(curr_file, *path_elements):
 	direc = os.path.dirname(os.path.abspath(curr_file))
@@ -106,3 +107,35 @@ def batch_average_files(curr_file, path_to_dir, name_frag_sets):
 		(averaged, files_used) = average_files(curr_file, path_to_dir, name_frags, files=search_pool)
 		yield averaged
 		search_pool = [f for f in search_pool if f not in files_used]
+
+def reduce_mult(l):
+	return functools.reduce(lambda e1, e2: e1 * e2, l, 1)
+
+''' specifically designed for matplotlib, so this generates a separate list of coordinates
+	for each dimenion '''
+def create_points_for_domain(domain, inclusive=False):
+	if inclusive:
+		domain = list(map(lambda d: d+1, domain))
+	ranges = list(map(lambda dim: [i for i in range(0, dim)], domain))
+	coordinate_lists = []
+	for i, dim in enumerate(domain):
+		coords = []
+		mult = 1
+		if i != len(domain) - 1:
+			mult = reduce_mult(domain[i+1:])
+		for e in ranges[i]:
+			coords += (mult * [e])
+		repeat_factor = reduce_mult(domain[0:i])
+		if repeat_factor > 0:
+			coords *= repeat_factor
+		coordinate_lists.append(coords)
+	return coordinate_lists
+
+
+
+
+
+
+
+
+
