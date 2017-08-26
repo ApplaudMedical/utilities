@@ -4,6 +4,9 @@ import csv
 import os
 import functools
 
+def map_to_list(func, l):
+	return list(map(func, l))
+
 def file_path(curr_file, *path_elements):
 	direc = os.path.dirname(os.path.abspath(curr_file))
 	return os.path.join(direc, *path_elements)
@@ -115,8 +118,8 @@ def reduce_mult(l):
 	for each dimenion '''
 def create_points_for_domain(domain, inclusive=False):
 	if inclusive:
-		domain = list(map(lambda d: d+1, domain))
-	ranges = list(map(lambda dim: [i for i in range(0, dim)], domain))
+		domain = map_to_list(lambda d: d+1, domain)
+	ranges = map_to_list(lambda dim: [i for i in range(0, dim)], domain)
 	coordinate_lists = []
 	for i, dim in enumerate(domain):
 		coords = []
@@ -130,12 +133,3 @@ def create_points_for_domain(domain, inclusive=False):
 			coords *= repeat_factor
 		coordinate_lists.append(coords)
 	return coordinate_lists
-
-
-
-
-
-
-
-
-
