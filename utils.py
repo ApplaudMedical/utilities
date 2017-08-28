@@ -12,7 +12,8 @@ def file_path(curr_file, *path_elements):
 	return os.path.join(direc, *path_elements)
 
 def open_file(curr_file, rel_path, protocol='r'):
-	return open(file_path(curr_file, rel_path), protocol)
+	newline = '' if os.name == 'nt' else '\n'
+	return open(file_path(curr_file, rel_path), protocol, newline=newline)
 
 # default preprocess function for parsing a csv of floats
 def preprocess(row):
