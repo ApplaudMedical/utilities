@@ -66,13 +66,28 @@ def filter_list_by_name_frags(l, name_frags):
 		for matching_name in filter_by_name_frags(name, name_frags):
 			yield matching_name
 
-def all_files_from_dir(curr_file, path_to_dir):
+
+def all_in_dir(curr_file, path_to_dir):
 	path_to_dir = file_path(curr_file, path_to_dir)
 	return os.listdir(path_to_dir)
+
+def all_files_from_dir(curr_file, path_to_dir):
+	dir_path = file_path(curr_file, path_to_dir)
+	all_entries = all_in_dir(curr_file, path_to_dir)
+	return [name for name in all_entries if not os.path.isdir(os.path.join(dir_path, name))]
+
+def all_dirs_from_dir(curr_file, path_to_dir):
+	dir_path = file_path(curr_file, path_to_dir)
+	all_entries = all_in_dir(curr_file, path_to_dir)
+	return [name for name in all_entries if os.path.isdir(os.path.join(dir_path, name))]
 
 def all_files_with_name_frags(curr_file, path_to_dir, name_frags):
 	all_files = all_files_from_dir(curr_file, path_to_dir)
 	return [f for f in filter_list_by_name_frags(all_files, name_frags)]
+
+def all_dirs_with_name_frags(curr_file, path_to_dir, name_frags):
+	all_dirs = all_dirs_from_dir(curr_file, path_to_dir)
+	return [d for d in filter_list_by_name_frags(all_dirs, name_frags)]
 
 def add_matrix(dest, mat):
 	for i, l in enumerate(mat):
