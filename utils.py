@@ -100,7 +100,7 @@ def normalize_matrix(mat, norming_factor):
 		for j, item in enumerate(l):
 			mat[i][j] /= norming_factor
 
-def read_matrix_file(curr_file, path, name):
+def read_matrix_file(curr_file, path, name=''):
 	return read_csv(curr_file, os.path.join(path, name), preprocess=preprocess)
 
 def average_files(curr_file, path_to_dir, name_frags=[], files=None, print_on=False):
