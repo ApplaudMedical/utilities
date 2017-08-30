@@ -53,7 +53,6 @@ def filter_by_name_frags(name, name_frags):
 		yield name
 	working_name = name
 	for i, frag in enumerate(name_frags):
-		print(working_name)
 		try:
 			idx = working_name.index(frag)
 			frag_end_idx = idx + len(frag)
