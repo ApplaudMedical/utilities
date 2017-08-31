@@ -166,3 +166,9 @@ def cartesian(*arrs):
 			coords *= repeat_factor
 		coordinate_lists.append(coords)
 	return coordinate_lists
+
+def mid_points(arr):
+	mids = []
+	for i in range(0, len(arr) - 1):
+		mids.append((arr[i] + arr[i+1])/2)
+	return mids
