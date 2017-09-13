@@ -12,7 +12,7 @@ def file_path(curr_file, *path_elements):
 	return os.path.join(direc, *path_elements)
 
 def open_file(curr_file, rel_path, protocol='r'):
-	if os.name = 'nt':
+	if os.name == 'nt':
 		return open(file_path(curr_file, rel_path), protocol, newline='')
 	else:
 		return open(file_path(curr_file, rel_path), protocol)
