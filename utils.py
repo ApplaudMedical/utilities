@@ -12,8 +12,10 @@ def file_path(curr_file, *path_elements):
 	return os.path.join(direc, *path_elements)
 
 def open_file(curr_file, rel_path, protocol='r'):
-	newline = '' if os.name == 'nt' else '\n'
-	return open(file_path(curr_file, rel_path), protocol, newline=newline)
+	if protocol.endswith('b') or os.name != 'nt':
+		return open(file_path(curr_file, rel_path), protocol)
+	else:
+		return open(file_path(curr_file, rel_path), protocol, newline='')
 
 # default preprocess function for parsing a csv of floats
 def preprocess(row):
@@ -25,18 +27,19 @@ def preprocess(row):
 			pass
 	return new_row
 
-def read_csv(curr_file, rel_path, num_to_discard=0, delimiter=',', preprocess=None):
+def read_csv(curr_file, rel_path, num_to_discard=0, delimiter=',', preprocess=None, sample_every=1):
 	data_file = open_file(curr_file, rel_path)
 	parsed_csv = csv.reader(data_file, delimiter=delimiter)
 	all_rows = []
 
-	count = 0
-	for row in parsed_csv:
+	for count, row in enumerate(parsed_csv):
 		if count >= num_to_discard:
+			if count % sample_every != 0:
+				continue
 			if preprocess is not None:
 				row = preprocess(row)
+				row = [row[i] for i in range(len(row)) if i % sample_every]
 			all_rows.append(row)
-		count += 1
 	data_file.close()
 	return all_rows
 
@@ -103,9 +106,9 @@ def normalize_matrix(mat, norming_factor):
 		for j, item in enumerate(l):
 			mat[i][j] /= norming_factor
 
-def read_matrix_file(curr_file, path, name=None):
+def read_matrix_file(curr_file, path, name=None, sample_every=1):
 	path = os.path.join(path, name) if name is not None else path
-	return read_csv(curr_file, path, preprocess=preprocess)
+	return read_csv(curr_file, path, preprocess=preprocess, sample_every=sample_every)
 
 # assumes all files are csvs that can be read using 'read_matrix_file'
 # if 'files' is an array of strings, filters list for names that contain name fragments
@@ -118,7 +121,7 @@ def average_files(curr_file, path_to_dir, name_frags=[], files=None, print_on=Fa
 	else:
 		files = [f for f in filter_list_by_name_frags(files, name_frags)]
 	if len(files) < 1:
-		raise 'There should be more than 0 files'
+		raise ValueError('There should be more than 0 files')
 	if print_on:
 		print('FILE: %s' % files[0])
 	result = read_matrix_file(curr_file, path_to_dir, files[0])
@@ -146,7 +149,7 @@ def reduce_mult(l):
 #	[0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1] ] 
 def create_points_for_domain(domain):
 	ranges = map_to_list(lambda dim: [i for i in range(0, dim)], domain)
-	return cartesian(ranges)
+	return cartesian(*ranges)
 
 # multidimensional generalization of a cartesian proces
 # given [2, 4, 6] and [2, 5, 8, 9] generates
@@ -154,6 +157,7 @@ def create_points_for_domain(domain):
 def cartesian(*arrs):
 	domain = map_to_list(lambda a: len(a), arrs)
 	coordinate_lists = []
+	print(arrs)
 	for i, dim in enumerate(domain):
 		coords = []
 		mult = 1
