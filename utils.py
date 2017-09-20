@@ -38,7 +38,7 @@ def read_csv(curr_file, rel_path, num_to_discard=0, delimiter=',', preprocess=No
 				continue
 			if preprocess is not None:
 				row = preprocess(row)
-				row = [row[i] for i in range(len(row)) if i % sample_every]
+				row = [row[i] for i in range(len(row)) if i % sample_every == 0]
 			all_rows.append(row)
 	data_file.close()
 	return all_rows
