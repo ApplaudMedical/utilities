@@ -176,3 +176,9 @@ def mid_points(arr):
 	for i in range(0, len(arr) - 1):
 		mids.append((arr[i] + arr[i+1])/2)
 	return mids
+
+def pad_zeros(to_pad, length):
+	padded = str(to_pad)
+	while len(padded) < length:
+		padded = '0' + padded
+	return padded
