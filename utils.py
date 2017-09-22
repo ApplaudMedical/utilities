@@ -3,6 +3,7 @@
 import csv
 import os
 import functools
+import numpy as np
 
 def map_to_list(func, l):
 	return list(map(func, l))
@@ -132,6 +133,25 @@ def average_files(curr_file, path_to_dir, name_frags=[], files=None, print_on=Fa
 	normalize_matrix(result, len(files))
 	return (result, files)
 
+# untested
+def max_over_files(curr_file, path_to_dir, name_frags=[], files=None, print_on=False):
+	if files is None:
+		files = all_files_with_name_frags(curr_file, path_to_dir, name_frags)
+	else:
+		files = [f for f in filter_list_by_name_frags(files, name_frags)]
+	if len(files) < 1:
+		raise ValueError('There should be more than 0 files')
+	if print_on:
+		print('FILE: %s' % files[0])
+	maxs = read_matrix_file(curr_file, path_to_dir, files[0])
+	print(maxs.shape)
+	for i in range(1, len(files)):
+		if print_on:
+			print('FILE: %s' % files[i])
+		maxs = np.array([maxs, read_matrix_file(curr_file, path_to_dir, files[i])]).max(0)
+		print(maxs.shape)
+	return (maxs, files)
+
 def batch_average_files(curr_file, path_to_dir, name_frag_sets):
 	search_pool = all_files_from_dir(curr_file, path_to_dir)
 	for name_frags in name_frag_sets:
@@ -182,3 +202,16 @@ def pad_zeros(to_pad, length):
 	while len(padded) < length:
 		padded = '0' + padded
 	return padded
+
+# 2D only
+def avg_with_mirror_along_axis(mat, axis):
+	avgd = np.zeros(mat.shape)
+	len_along_axis = mat.shape[axis]
+	for i in range(mat.shape[axis]):
+		if axis is 0:
+			avgd[i] = (mat[i] + mat[len_along_axis - 1 - i]) / 2.
+		else:
+			avgd[:, i] = (mat[:, i] + mat[:, (len_along_axis - 1 - i)]) / 2.
+	return avgd
+
+
