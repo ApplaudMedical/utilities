@@ -215,13 +215,17 @@ def avg_with_mirror_along_axis(mat, axis):
 			avgd[:, i] = (mat[:, i] + mat[:, (len_along_axis - 1 - i)]) / 2.
 	return avgd
 
+def func_wrapper(args):
+	func = args[0]
+	args = args[1:]
+	return func(*args)
+
 def map_parallel(func, args_list, cores=None):
 	cores = mp.cpu_count() if cores is None else cores
 	pool = mp.Pool(cores)
 
-	def func_wrapper(args):
-		return func(*args)
+	args_list_with_func = map_to_list(lambda args: [func] + args, args_list)
 
-	results = pool.map(func_wrapper, args_list)
-	Pool.close()
+	results = pool.map(func_wrapper, args_list_with_func)
+	pool.close()
 	return results
