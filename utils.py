@@ -4,6 +4,7 @@ import csv
 import os
 import functools
 import numpy as np
+import multiprocessing as mp
 
 def map_to_list(func, l):
 	return list(map(func, l))
@@ -214,4 +215,13 @@ def avg_with_mirror_along_axis(mat, axis):
 			avgd[:, i] = (mat[:, i] + mat[:, (len_along_axis - 1 - i)]) / 2.
 	return avgd
 
+def map_parallel(func, args_list, cores=None):
+	cores = cores if cores else mp.cpu_count()
+	pool = mp.Pool(cores)
 
+	def func_wrapper(args):
+		return func(*args)
+
+	results = pool.map(func_wrapper, args_list)
+	Pool.close()
+	return results
