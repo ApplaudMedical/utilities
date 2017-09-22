@@ -216,7 +216,7 @@ def avg_with_mirror_along_axis(mat, axis):
 	return avgd
 
 def map_parallel(func, args_list, cores=None):
-	cores = cores if cores else mp.cpu_count()
+	cores = mp.cpu_count() if cores is None else cores
 	pool = mp.Pool(cores)
 
 	def func_wrapper(args):
