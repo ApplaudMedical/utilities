@@ -167,7 +167,8 @@ def reduce_mult(l):
 # given [1, 2, 1] generates
 # [ [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
 #	[0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2],
-#	[0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1] ] 
+#	[0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1] ]
+# providing a 'true_dims' argument of same shape as 'points_per_axis' scales 'points_per_axis' to 'true_dims'
 def create_points_for_domain(points_per_axis, true_dims=None):
 	if true_dims is None:
 		true_dims = points_per_axis
