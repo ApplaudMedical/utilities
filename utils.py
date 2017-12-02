@@ -168,8 +168,13 @@ def reduce_mult(l):
 # [ [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
 #	[0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2],
 #	[0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1] ] 
-def create_points_for_domain(domain):
-	ranges = map_to_list(lambda dim: [i for i in range(0, dim)], domain)
+def create_points_for_domain(points_per_axis, true_dims=None):
+	if true_dims is None:
+		true_dims = points_per_axis
+	ranges = []
+	for i, dim in enumerate(points_per_axis):
+		range_for_axis = [true_dims[i] * float(j) / dim for j in range(dim)]
+		ranges.append(range_for_axis)
 	return cartesian(*ranges)
 
 # multidimensional generalization of a cartesian proces
