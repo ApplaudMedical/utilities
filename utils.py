@@ -1,4 +1,4 @@
-# David Bell's general utilties
+	# David Bell's general utilties
 
 import csv
 import os
@@ -90,11 +90,15 @@ def all_dirs_from_dir(curr_file, path_to_dir):
 
 # finds all files in root direct 'path_to_dir' that contain name fragments in order
 def all_files_with_name_frags(curr_file, path_to_dir, name_frags):
+	if not isinstance(name_frags, list):
+		name_frags = [name_frags]
 	all_files = all_files_from_dir(curr_file, path_to_dir)
 	return [f for f in filter_list_by_name_frags(all_files, name_frags)]
 
 # finds all directories in root direct 'path_to_dir' that contain name fragments in order
 def all_dirs_with_name_frags(curr_file, path_to_dir, name_frags):
+	if not isinstance(name_frags, list):
+		name_frags = [name_frags]
 	all_dirs = all_dirs_from_dir(curr_file, path_to_dir)
 	return [d for d in filter_list_by_name_frags(all_dirs, name_frags)]
 
