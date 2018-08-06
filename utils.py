@@ -57,12 +57,16 @@ def filter_by_name_frags(name, name_frags):
 	if len(name_frags) == 0:
 		yield name
 	working_name = name
-	for i, frag in enumerate(name_frags):
+
+	expanded_name_frags = []
+	for frag in name_frags:
+		expanded_name_frags += frag.split('*')
+	for i, frag in enumerate(expanded_name_frags):
 		try:
 			idx = working_name.index(frag)
 			frag_end_idx = idx + len(frag)
 			working_name = working_name[frag_end_idx:]
-			if i == len(name_frags) - 1:
+			if i == len(expanded_name_frags) - 1:
 				yield name
 		except ValueError:
 			break
