@@ -26,24 +26,30 @@ def preprocess(row):
 		try:
 			new_row.append(float(item))
 		except ValueError as e:
-			pass
+			new_row.append(np.nan)
 	return new_row
 
-def read_csv(curr_file, rel_path, num_to_discard=0, delimiter=',', preprocess=None, sample_every=1):
+def read_csv(curr_file, rel_path, num_to_discard=0, delimiter=',', preprocess=None, sample_every=1, discarded=None):
 	data_file = open_file(curr_file, rel_path)
 	parsed_csv = csv.reader(data_file, delimiter=delimiter)
-	all_rows = []
 
-	for count, row in enumerate(parsed_csv):
-		if count >= num_to_discard:
+	if num_to_discard > 0:
+		for i in range(num_to_discard):
+			row = parsed_csv.__next__()
+			if discarded is not None and isinstance(discarded, list):
+				discarded.append(row)
+
+	def paginated_reader():
+		for count, row in enumerate(parsed_csv):
 			if count % sample_every != 0:
 				continue
 			if preprocess is not None:
 				row = preprocess(row)
 				row = [row[i] for i in range(len(row)) if i % sample_every == 0]
-			all_rows.append(row)
-	data_file.close()
-	return all_rows
+			yield row
+		data_file.close()
+
+	return paginated_reader()
 
 def write_csv(curr_file, rel_path, delimiter=',', to_dump=None):
 	data_file = open_file(curr_file, rel_path, 'w')
@@ -116,9 +122,9 @@ def normalize_matrix(mat, norming_factor):
 		for j, item in enumerate(l):
 			mat[i][j] /= norming_factor
 
-def read_matrix_file(curr_file, path, name=None, sample_every=1):
+def read_matrix_file(curr_file, path, name=None, sample_every=1, num_to_discard=0, discarded=None):
 	path = os.path.join(path, name) if name is not None else path
-	return read_csv(curr_file, path, preprocess=preprocess, sample_every=sample_every)
+	return read_csv(curr_file, path, preprocess=preprocess, sample_every=sample_every, num_to_discard=num_to_discard, discarded=discarded)
 
 # assumes all files are csvs that can be read using 'read_matrix_file'
 # if 'files' is an array of strings, filters list for names that contain name fragments
