@@ -26,24 +26,30 @@ def preprocess(row):
 		try:
 			new_row.append(float(item))
 		except ValueError as e:
-			pass
+			new_row.append(np.nan)
 	return new_row
 
-def read_csv(curr_file, rel_path, num_to_discard=0, delimiter=',', preprocess=None, sample_every=1):
+def read_csv(curr_file, rel_path, num_to_discard=0, delimiter=',', preprocess=None, sample_every=1, discarded=None):
 	data_file = open_file(curr_file, rel_path)
 	parsed_csv = csv.reader(data_file, delimiter=delimiter)
-	all_rows = []
 
-	for count, row in enumerate(parsed_csv):
-		if count >= num_to_discard:
+	if num_to_discard > 0:
+		for i in range(num_to_discard):
+			row = parsed_csv.__next__()
+			if discarded is not None and isinstance(discarded, list):
+				discarded.append(row)
+
+	def paginated_reader():
+		for count, row in enumerate(parsed_csv):
 			if count % sample_every != 0:
 				continue
 			if preprocess is not None:
 				row = preprocess(row)
 				row = [row[i] for i in range(len(row)) if i % sample_every == 0]
-			all_rows.append(row)
-	data_file.close()
-	return all_rows
+			yield row
+		data_file.close()
+
+	return paginated_reader()
 
 def write_csv(curr_file, rel_path, delimiter=',', to_dump=None):
 	data_file = open_file(curr_file, rel_path, 'w')
@@ -57,12 +63,16 @@ def filter_by_name_frags(name, name_frags):
 	if len(name_frags) == 0:
 		yield name
 	working_name = name
-	for i, frag in enumerate(name_frags):
+
+	expanded_name_frags = []
+	for frag in name_frags:
+		expanded_name_frags += frag.split('*')
+	for i, frag in enumerate(expanded_name_frags):
 		try:
 			idx = working_name.index(frag)
 			frag_end_idx = idx + len(frag)
 			working_name = working_name[frag_end_idx:]
-			if i == len(name_frags) - 1:
+			if i == len(expanded_name_frags) - 1:
 				yield name
 		except ValueError:
 			break
@@ -90,11 +100,15 @@ def all_dirs_from_dir(curr_file, path_to_dir):
 
 # finds all files in root direct 'path_to_dir' that contain name fragments in order
 def all_files_with_name_frags(curr_file, path_to_dir, name_frags):
+	if not isinstance(name_frags, list):
+		name_frags = [name_frags]
 	all_files = all_files_from_dir(curr_file, path_to_dir)
 	return [f for f in filter_list_by_name_frags(all_files, name_frags)]
 
 # finds all directories in root direct 'path_to_dir' that contain name fragments in order
 def all_dirs_with_name_frags(curr_file, path_to_dir, name_frags):
+	if not isinstance(name_frags, list):
+		name_frags = [name_frags]
 	all_dirs = all_dirs_from_dir(curr_file, path_to_dir)
 	return [d for d in filter_list_by_name_frags(all_dirs, name_frags)]
 
@@ -108,9 +122,9 @@ def normalize_matrix(mat, norming_factor):
 		for j, item in enumerate(l):
 			mat[i][j] /= norming_factor
 
-def read_matrix_file(curr_file, path, name=None, sample_every=1):
+def read_matrix_file(curr_file, path, name=None, sample_every=1, num_to_discard=0, discarded=None):
 	path = os.path.join(path, name) if name is not None else path
-	return read_csv(curr_file, path, preprocess=preprocess, sample_every=sample_every)
+	return read_csv(curr_file, path, preprocess=preprocess, sample_every=sample_every, num_to_discard=num_to_discard, discarded=discarded)
 
 # assumes all files are csvs that can be read using 'read_matrix_file'
 # if 'files' is an array of strings, filters list for names that contain name fragments
@@ -167,9 +181,15 @@ def reduce_mult(l):
 # given [1, 2, 1] generates
 # [ [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
 #	[0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2],
-#	[0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1] ] 
-def create_points_for_domain(domain):
-	ranges = map_to_list(lambda dim: [i for i in range(0, dim)], domain)
+#	[0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1] ]
+# providing a 'true_dims' argument of same shape as 'points_per_axis' scales 'points_per_axis' to 'true_dims'
+def create_points_for_domain(points_per_axis, true_dims=None):
+	if true_dims is None:
+		true_dims = points_per_axis
+	ranges = []
+	for i, dim in enumerate(points_per_axis):
+		range_for_axis = [true_dims[i] * float(j) / dim for j in range(dim)]
+		ranges.append(range_for_axis)
 	return cartesian(*ranges)
 
 # multidimensional generalization of a cartesian proces
@@ -226,13 +246,13 @@ def map_parallel(func, args_list, cores=None):
 	results = []
 
 	for completed in range(0, len(args_list), cores):
-		print('Created pool')
+		#print('Created pool')
 		pool = mp.Pool(cores)
 		partial_results = pool.map(func_wrapper, args_list_with_func[completed:(completed + cores)])
 		pool.close()
 		pool.join()
 		results.append(partial_results)
-		print('Closed pool')
+		#print('Closed pool')
 	results = [res for partial_results in results for res in partial_results]
 	return results
 
@@ -247,3 +267,7 @@ def t_test(group_1, group_2):
 
 def confidence_interval(x, z=2.58):
 	return z * np.std(x) / len(x)
+
+def bucket(x, bucket_size):
+	indices = np.linspace(x.min(), x.max(), int((x.max() - x.min()) / bucket_size) + 1)
+	print(indices)
