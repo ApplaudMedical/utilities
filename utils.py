@@ -235,3 +235,15 @@ def map_parallel(func, args_list, cores=None):
 		print('Closed pool')
 	results = [res for partial_results in results for res in partial_results]
 	return results
+
+def t_test(group_1, group_2):
+	group_1 = np.array(group_1)
+	group_2 = np.array(group_2)
+	mean_1 = np.mean(group_1)
+	mean_2 = np.mean(group_2)
+	std_1 = np.std(group_1)
+	std_2 = np.std(group_2)
+	return abs(mean_1 - mean_2) / np.sqrt(std_1**2 / len(group_1) + std_2**2 / len(group_2))
+
+def confidence_interval(x, z=2.58):
+	return z * np.std(x) / len(x)
