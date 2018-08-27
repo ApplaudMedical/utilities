@@ -1,4 +1,31 @@
 from matplotlib import pyplot as plt
+import numpy as np
+
+class GraphManager:
+	def __init__(self, fig, ax):
+		self.fig = fig
+		self.ax = ax
+
+	def draw_refs(self, horizontal=True, vertical=True):
+		if horizontal:
+			y = self.ax.get_yaxis()
+			self.draw_ref_lines(y.get_ticklocs()[1:-1])
+		if vertical:
+			x = self.ax.get_xaxis()
+			self.draw_ref_lines(x.get_ticklocs()[1:-1], vertical=True)
+
+	def draw_ref_lines(self, coords, vertical=False):
+		if vertical:
+			lims = self.ax.get_ylim()
+		else:
+			lims = self.ax.get_xlim()
+		points = np.arange(lims[0], lims[1])
+
+		for coord in coords:
+			if vertical:
+				self.ax.plot([coord] * len(points), points, '--', lw=0.5, color='black', alpha=0.3)
+			else:
+				self.ax.plot(points, [coord] * len(points), '--', lw=0.5, color='black', alpha=0.3)
 
 def gen_plot():
 	fig = plt.figure()
@@ -12,7 +39,7 @@ def gen_plot():
 	ax.get_xaxis().tick_bottom()
 	ax.get_yaxis().tick_left()
 
-	return (fig, ax)
+	return (fig, ax, GraphManager(fig, ax))
 
 # tableau20 colors borrowed from http://www.randalolson.com/2014/06/28/how-to-make-beautiful-data-visualizations-in-python-with-matplotlib/
 tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),    
