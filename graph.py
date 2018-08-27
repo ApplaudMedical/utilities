@@ -8,7 +8,7 @@ def gen_plot():
 	for orientation in ['top', 'right']:
 		ax.spines[orientation].set_visible(False)
 
-	# remove axis ticks
+	# confine tick marks to bottom and left of plot
 	ax.get_xaxis().tick_bottom()
 	ax.get_yaxis().tick_left()
 
