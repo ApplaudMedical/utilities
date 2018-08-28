@@ -9,10 +9,10 @@ class GraphManager:
 	def draw_refs(self, horizontal=True, vertical=True):
 		if horizontal:
 			y = self.ax.get_yaxis()
-			self.draw_ref_lines(y.get_ticklocs()[1:-1])
+			self.draw_ref_lines(y.get_ticklocs())
 		if vertical:
 			x = self.ax.get_xaxis()
-			self.draw_ref_lines(x.get_ticklocs()[1:-1], vertical=True)
+			self.draw_ref_lines(x.get_ticklocs(), vertical=True)
 
 	def draw_ref_lines(self, coords, vertical=False):
 		if vertical:
