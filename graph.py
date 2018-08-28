@@ -19,7 +19,7 @@ class GraphManager:
 			lims = self.ax.get_ylim()
 		else:
 			lims = self.ax.get_xlim()
-		points = np.arange(lims[0], lims[1])
+		points = np.arange(lims[0], lims[1], np.abs(lims[1] - lims[0]) / 100)
 
 		for coord in coords:
 			if vertical:
@@ -35,7 +35,7 @@ def gen_plot():
 	for orientation in ['top', 'right']:
 		ax.spines[orientation].set_visible(False)
 
-	# remove axis ticks
+	# confine tick marks to bottom and left of plot
 	ax.get_xaxis().tick_bottom()
 	ax.get_yaxis().tick_left()
 
