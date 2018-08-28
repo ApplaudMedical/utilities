@@ -1,10 +1,11 @@
-	# David Bell's general utilties
+# David Bell's general utilties
 
 import csv
 import os
 import functools
 import numpy as np
 import multiprocessing as mp
+from scipy.interpolate import interp1d
 
 def map_to_list(func, l):
 	return list(map(func, l))
@@ -18,6 +19,16 @@ def open_file(curr_file, rel_path, protocol='r'):
 		return open(file_path(curr_file, rel_path), protocol)
 	else:
 		return open(file_path(curr_file, rel_path), protocol, newline='')
+
+# https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+def make_dir_path(curr_file, dir_path):
+	abs_path = file_path(curr_file, dir_path)
+	if not os.path.exists(abs_path):
+		try:
+			os.makedirs(abs_path)
+		except OSError as exc:
+			if exc.errno != errno.EEXIST:
+				raise
 
 # default preprocess function for parsing a csv of floats
 def preprocess(row):
@@ -194,7 +205,6 @@ def create_points_for_domain(points_per_axis, true_dims=None):
 def cartesian(*arrs):
 	domain = map_to_list(lambda a: len(a), arrs)
 	coordinate_lists = []
-	print(arrs)
 	for i, dim in enumerate(domain):
 		coords = []
 		mult = 1
@@ -252,6 +262,8 @@ def map_parallel(func, args_list, cores=None):
 	results = [res for partial_results in results for res in partial_results]
 	return results
 
-def bucket(x, bucket_size):
-	indices = np.linspace(x.min(), x.max(), int((x.max() - x.min()) / bucket_size) + 1)
-	print(indices)
+# supports linear interpolation
+def rebin(arr, new_dim):
+	x = np.multiply(np.arange(len(arr)), float(new_dim + 1)/len(arr))
+	iterp_func = interp1d(x, arr)
+	return iterp_func(np.arange(new_dim))
