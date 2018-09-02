@@ -41,6 +41,10 @@ def gen_plot():
 
 	return (fig, ax, GraphManager(fig, ax))
 
+def scatter(ax, x, xerr, y, yerr, err_bar_thickness=0.5, color='black', err_bar_color='black', label=''):
+	ax.scatter(x, y, color=color, label=label)
+	ax.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='none', color=err_bar_color, capsize=3, elinewidth=err_bar_thickness, capthick=err_bar_thickness)
+
 # tableau20 colors borrowed from http://www.randalolson.com/2014/06/28/how-to-make-beautiful-data-visualizations-in-python-with-matplotlib/
 tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),    
              (44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),    
@@ -52,4 +56,4 @@ for i in range(len(tableau20)):
 	r, g, b = tableau20[i]
 	tableau20[i] = (r / 255., g / 255., b / 255.)
 
-__all__ = ['gen_plot', 'tableau20', 'GraphManager']
+__all__ = ['gen_plot', 'scatter', 'tableau20', 'GraphManager']
