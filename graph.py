@@ -27,7 +27,7 @@ class GraphManager:
 			else:
 				self.ax.plot(points, [coord] * len(points), '--', lw=0.5, color='black', alpha=0.3)
 
-def color_generator(color):
+def color_generator(colors):
 	c_idx = [0]
 	def gen():
 		col = colors[c_idx[0]]
