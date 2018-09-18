@@ -35,9 +35,10 @@ def color_generator(colors):
 		return col
 	return gen
 
-def gen_plot():
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
+def gen_plot(fig=None, pos=111):
+	if fig is None:
+		fig = plt.figure()
+	ax = fig.add_subplot(pos)
 
 	# remove top and right lines on graph
 	for orientation in ['top', 'right']:
