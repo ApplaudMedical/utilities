@@ -2,13 +2,13 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 def line(x, m, b):
-	return m * x + b
+	return np.multiply(m, x) + b
 
 def exp(x, a, b, c):
 	return a * np.exp(b * x) + c
 
 def fit(func, X, Y, p0=None, runtime=10000):
-	params = curve_fit(func, X, Y, p0=p0, maxfev=runtime)
+	params, cov = curve_fit(func, X, Y, p0=p0, maxfev=runtime)
 
 	def parameterized_func(x):
 		return func(x, *params)
