@@ -27,9 +27,18 @@ class GraphManager:
 			else:
 				self.ax.plot(points, [coord] * len(points), '--', lw=0.5, color='black', alpha=0.3)
 
-def gen_plot():
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
+def color_generator(colors):
+	c_idx = [0]
+	def gen():
+		col = colors[c_idx[0]]
+		c_idx[0] = (c_idx[0] + 1) % len(colors)
+		return col
+	return gen
+
+def gen_plot(fig=None, pos=111):
+	if fig is None:
+		fig = plt.figure()
+	ax = fig.add_subplot(pos)
 
 	# remove top and right lines on graph
 	for orientation in ['top', 'right']:
@@ -56,4 +65,4 @@ for i in range(len(tableau20)):
 	r, g, b = tableau20[i]
 	tableau20[i] = (r / 255., g / 255., b / 255.)
 
-__all__ = ['gen_plot', 'scatter', 'tableau20', 'GraphManager']
+__all__ = ['gen_plot', 'scatter', 'tableau20', 'GraphManager', 'color_generator']

@@ -70,29 +70,37 @@ def write_csv(curr_file, rel_path, delimiter=',', to_dump=None):
 			csv_writer.writerow(row)
 	data_file.close()
 
-def filter_by_name_frags(name, name_frags):
+def filter_by_name_frags(name, name_frags, in_order=True):
+	# simply yield name if there are no name fragments with which to filter
 	if len(name_frags) == 0:
 		yield name
+	# working name is pruned as fragments are found within name to ensure fragments are found in order
 	working_name = name
 
+	# split any name fragments with '*' into two separate name fragments
 	expanded_name_frags = []
 	for frag in name_frags:
 		expanded_name_frags += frag.split('*')
+
 	for i, frag in enumerate(expanded_name_frags):
 		try:
 			idx = working_name.index(frag)
 			frag_end_idx = idx + len(frag)
-			working_name = working_name[frag_end_idx:]
+			if in_order:
+				# if fragment is found in working name, prune working_name if order matters
+				working_name = working_name[frag_end_idx:]
 			if i == len(expanded_name_frags) - 1:
+				# last fragment has been found; yield name
 				yield name
 		except ValueError:
+			# name fragment does not exist within working_name; name is filtered out
 			break
 
 # filters list of strings, leaving on elements that contain name frags, in order
 # NOTE: uses first instance of name fragment and no other instance
-def filter_list_by_name_frags(l, name_frags):
+def filter_list_by_name_frags(l, name_frags, in_order=True):
 	for name in l:
-		for matching_name in filter_by_name_frags(name, name_frags):
+		for matching_name in filter_by_name_frags(name, name_frags, in_order=in_order):
 			yield matching_name
 
 def all_in_dir(curr_file, path_to_dir):
@@ -110,18 +118,18 @@ def all_dirs_from_dir(curr_file, path_to_dir):
 	return [name for name in all_entries if os.path.isdir(os.path.join(dir_path, name))]
 
 # finds all files in root direct 'path_to_dir' that contain name fragments in order
-def all_files_with_name_frags(curr_file, path_to_dir, name_frags):
+def all_files_with_name_frags(curr_file, path_to_dir, name_frags, in_order=True):
 	if not isinstance(name_frags, list):
 		name_frags = [name_frags]
 	all_files = all_files_from_dir(curr_file, path_to_dir)
-	return [f for f in filter_list_by_name_frags(all_files, name_frags)]
+	return [f for f in filter_list_by_name_frags(all_files, name_frags, in_order=in_order)]
 
 # finds all directories in root direct 'path_to_dir' that contain name fragments in order
-def all_dirs_with_name_frags(curr_file, path_to_dir, name_frags):
+def all_dirs_with_name_frags(curr_file, path_to_dir, name_frags, in_order=True):
 	if not isinstance(name_frags, list):
 		name_frags = [name_frags]
 	all_dirs = all_dirs_from_dir(curr_file, path_to_dir)
-	return [d for d in filter_list_by_name_frags(all_dirs, name_frags)]
+	return [d for d in filter_list_by_name_frags(all_dirs, name_frags, in_order=in_order)]
 
 def add_matrix(dest, mat):
 	for i, l in enumerate(mat):
