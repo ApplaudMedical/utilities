@@ -7,13 +7,16 @@ def line(x, m, b):
 def exp(x, a, b, c):
 	return a * np.exp(b * x) + c
 
-def fit(func, X, Y, p0=None, runtime=10000):
+def fit(func, X, Y, p0=None, runtime=10000, produce_fit=False):
 	params, cov = curve_fit(func, X, Y, p0=p0, maxfev=runtime)
 
 	def parameterized_func(x):
-		print(params)
 		return func(x, *params)
 
+	if produce_fit:
+		bounds = (X.min(), X.max())
+		x_test = np.arange(bounds[0], bounds[1], (bounds[1] - bounds[0]) / 1000)
+		return (parameterized_func, params, x_test, parameterized_func(x_test))
 	return (parameterized_func, params)
 
 def r_squared(func, X, Y):

@@ -50,8 +50,8 @@ def gen_plot(fig=None, pos=111):
 
 	return (fig, ax, GraphManager(fig, ax))
 
-def scatter(ax, x, xerr, y, yerr, err_bar_thickness=0.5, color='black', err_bar_color='black', label='', s=3):
-	ax.scatter(x, y, color=color, label=label, s=s)
+def scatter(ax, x, xerr, y, yerr, err_bar_thickness=0.5, color='black', err_bar_color='black', label='', s=3, marker=None, facecolors=None):
+	ax.scatter(x, y, color=color, label=label, s=s, marker=marker, facecolors=color if facecolors is None else facecolors)
 	ax.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='none', color=err_bar_color, capsize=3, elinewidth=err_bar_thickness, capthick=err_bar_thickness)
 
 # tableau20 colors borrowed from http://www.randalolson.com/2014/06/28/how-to-make-beautiful-data-visualizations-in-python-with-matplotlib/
