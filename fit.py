@@ -4,6 +4,9 @@ from scipy.optimize import curve_fit
 def line(x, m, b):
 	return m * x + b
 
+def line_zero_inter(x, m):
+	return line(x, m, 0)
+
 def exp(x, a, b, c):
 	return a * np.exp(b * x) + c
 
@@ -11,7 +14,6 @@ def fit(func, X, Y, p0=None, runtime=10000):
 	params = curve_fit(func, X, Y, p0=p0, maxfev=runtime)[0]
 
 	def parameterized_func(x):
-		print(params)
 		return func(x, *params)
 
 	return (parameterized_func, params)
