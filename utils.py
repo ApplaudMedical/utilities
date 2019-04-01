@@ -8,20 +8,54 @@ import multiprocessing as mp
 from scipy.interpolate import interp1d
 
 def map_to_list(func, l):
+	'''
+	Maps the list 'l' through the function 'func'
+
+	Parameters
+	----------
+	func : function
+		Takes a single argument of type of 'l'
+	l : list
+
+	'''
 	return list(map(func, l))
 
 def file_path(curr_file, *path_elements):
+	'''
+	Joins absolute path to 'curr_file' with 'path_elements'
+
+	Parameters
+	----------
+	curr_file : string
+	*path_elements : strings
+	'''
 	direc = os.path.dirname(os.path.abspath(curr_file))
 	return os.path.join(direc, *path_elements)
 
 def open_file(curr_file, rel_path, protocol='r'):
+	'''
+	Opens file by joining 'curr_file', 'rel_path'.
+
+	Parameters
+	----------
+	curr_file : string
+	rel_path : string
+	'''
 	if protocol.endswith('b') or os.name != 'nt':
 		return open(file_path(curr_file, rel_path), protocol)
 	else:
 		return open(file_path(curr_file, rel_path), protocol, newline='')
 
-# https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
 def make_dir_path(curr_file, dir_path):
+	'''
+	Makes a directory from the absolute path to 'curr_file' joined with 'dir_path'.
+	https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+
+	Parameters
+	----------
+	curr_file : string
+	dir_path : string
+	'''
 	abs_path = file_path(curr_file, dir_path)
 	if not os.path.exists(abs_path):
 		try:
@@ -32,6 +66,13 @@ def make_dir_path(curr_file, dir_path):
 
 # default preprocess function for parsing a csv of floats
 def preprocess(row):
+	'''
+	Converts list of strings in floats.
+
+	Parameters
+	----------
+	row : list of strings
+	'''
 	new_row = []
 	for i, item in enumerate(row):
 		try:
@@ -41,6 +82,30 @@ def preprocess(row):
 	return new_row
 
 def read_csv(curr_file, rel_path, num_to_discard=0, delimiter=',', preprocess=None, sample_every=1, discarded=None):
+	'''
+	Reads csv specified by absolute path to 'curr_file' joined with 'rel_path'.
+
+	Parameters
+	----------
+	curr_file : string
+		Absolute path to 'curr_file' is used as the base path
+	rel_path : string
+		Joined to absolute path to 'curr_file' to specify location of CSV
+	num_to_discard : int
+		Number of rows to discard at beginning of CSV. These rows are placed into discarded.
+	delimiter : string
+		Delimiting character for parsing CSV
+	preprocess : function
+		Function to run on each row, which maps list --> list
+	sample_every : int
+		1 in every 'sample_every' number of rows are kept. Default is to save all rows.
+	discarded : list
+		Pass list to retrieve number of rows specified by 'num_to_discard'
+
+	Returns
+	-------
+	Generator that returns processed rows
+	'''
 	data_file = open_file(curr_file, rel_path)
 	parsed_csv = csv.reader(data_file, delimiter=delimiter)
 
@@ -63,6 +128,21 @@ def read_csv(curr_file, rel_path, num_to_discard=0, delimiter=',', preprocess=No
 	return paginated_reader()
 
 def write_csv(curr_file, rel_path, delimiter=',', to_dump=None):
+	'''
+	Write to CSV specified by 'curr_file' and 'rel_path'
+
+	Parameters
+	----------
+	curr_file : string
+		Absolute path to 'curr_file' is used as the base path
+	rel_path : string
+		Joined to absolute path to 'curr_file' to specify location of CSV
+	delimiter : string
+		Delimiting character for writing CSV rows
+	to_dump : list of lists or np array
+		Data to write to file
+	'''
+
 	data_file = open_file(curr_file, rel_path, 'w')
 	csv_writer = csv.writer(data_file, delimiter=delimiter)
 	if to_dump is not None:
@@ -71,6 +151,23 @@ def write_csv(curr_file, rel_path, delimiter=',', to_dump=None):
 	data_file.close()
 
 def filter_by_name_frags(name, name_frags, in_order=True):
+	'''
+	Yields 'name' if it separately contains all the strings within 'name_frags'. If 'in_order' is True, name fragements must be in order.
+
+	Parameters
+	----------
+	name : string
+		String to be returned if it contains all of 'name_frags'
+	rel_path : list of strings
+		Name fragments that 'name' must contain to be yielded
+	in_order : boolean
+		If true, 'name' must contain 'name_frags' in the order they are specified
+
+	Returns
+	-------
+	Yields 'name' or nothing
+	'''
+
 	# simply yield name if there are no name fragments with which to filter
 	if len(name_frags) == 0:
 		yield name
@@ -291,3 +388,37 @@ def rebin(arr, new_dim):
 	x = np.multiply(np.arange(len(arr)), float(new_dim + 1)/len(arr))
 	iterp_func = interp1d(x, arr)
 	return iterp_func(np.arange(new_dim))
+
+# returns a list of unique values in the given Pandas dataframe for each column name specified 
+def to_unique_vals(df, col_names):
+    return tuple([df[col_name].unique() for col_name in col_names])
+
+# returns a subset of dataframe 
+def select(df, selection):
+    criteria = []
+    for col in selection:
+        criteria.append(df[col] == selection[col])
+    return df[np.all(criteria, axis=0)]
+
+def format_number(number, sig_figs=3):
+    num = str(number)
+    count = len(num.strip('.'))
+    return num[:(-1 * (count - sig_figs - 1))]
+
+def calc_bin_size(target_bin_size):
+    growing = target_bin_size > 1
+    return calc_bin_size_iter(target_bin_size, 1, growing)
+
+def calc_bin_size_iter(target_bin_size, bin_size, growing=True):
+    if bin_size > target_bin_size:
+        if growing:
+            return bin_size / 2
+        else:
+            return calc_bin_size_iter(target_bin_size, bin_size / 2)
+    else:
+        if not growing:
+            return bin_size
+        else:
+            return calc_bin_size_iter(target_bin_size, 2 * bin_size)
+
+
