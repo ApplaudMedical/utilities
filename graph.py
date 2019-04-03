@@ -109,4 +109,4 @@ for i in range(len(tableau20)):
 	r, g, b = tableau20[i]
 	tableau20[i] = (r / 255., g / 255., b / 255.)
 
-__all__ = ['gen_plot', 'scatter', 'tableau20', 'GraphManager', 'color_generator']
+__all__ = ['gen_plot', 'scatter', 'tableau20', 'GraphManager', 'color_generator', 'SmartGraph']
