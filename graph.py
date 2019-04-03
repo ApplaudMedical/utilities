@@ -72,7 +72,7 @@ class SmartGraph:
 				means.append(y_vals.mean())
 				cis.append(1.96 * y_vals.std() / np.sqrt(len(y_vals)))
 			processed_data.append({'x_vals': unique_vals, 'y_vals': means, 'y_cis': cis})
-	    return processed_data
+		return processed_data
 
 	def check_setting(self, setting, required_len, default):
 		if setting is None:
