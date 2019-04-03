@@ -158,7 +158,7 @@ def filter_by_name_frags(name, name_frags, in_order=True):
 	----------
 	name : string
 		String to be returned if it contains all of 'name_frags'
-	rel_path : list of strings
+	name_frags : list of strings
 		Name fragments that 'name' must contain to be yielded
 	in_order : boolean
 		If true, 'name' must contain 'name_frags' in the order they are specified
@@ -193,29 +193,96 @@ def filter_by_name_frags(name, name_frags, in_order=True):
 			# name fragment does not exist within working_name; name is filtered out
 			break
 
-# filters list of strings, leaving on elements that contain name frags, in order
-# NOTE: uses first instance of name fragment and no other instance
 def filter_list_by_name_frags(l, name_frags, in_order=True):
+	'''
+	Filters strings contained in list 'l' by 'name_frags'. Each string within 'l' must contain
+	the elements of 'name_frags' in order if 'in_order' is True or out of order if False
+
+	Parameters
+	----------
+	l : list of strings
+		List of strings to be filtered
+	name_frags : list of strings
+		Name fragments that each element of 'l' must contain to be yielded
+	in_order : boolean
+		If true, elements of 'l' must contain 'name_frags' in the order 'name_frags' specifies
+
+	Returns
+	-------
+	Function itself is a generator that yields elements of 'l' that pass filtration
+	'''
 	for name in l:
 		for matching_name in filter_by_name_frags(name, name_frags, in_order=in_order):
 			yield matching_name
 
 def all_in_dir(curr_file, path_to_dir):
+	'''
+	Returns the names of all files and directories within the directory specified by the absolute path to
+	'curr_file' joined with 'path_to_dir'
+
+	Parameters
+	----------
+	curr_file : string
+		Absolute path to 'curr_file' is used as the base path
+	path_to_dir : string
+		Relative path from 'curr_file' to directory to read
+
+	Returns
+	-------
+	List of strings of all files and directories in specified directory
+	'''
 	path_to_dir = file_path(curr_file, path_to_dir)
 	return os.listdir(path_to_dir)
 
 def all_files_from_dir(curr_file, path_to_dir):
+	'''
+	Similar to 'all_in_dir' but only returns files.
+
+	Parameters
+	----------
+	curr_file : string
+		Absolute path to 'curr_file' is used as the base path
+	path_to_dir : string
+		Relative path from 'curr_file' to directory to read
+	'''
 	dir_path = file_path(curr_file, path_to_dir)
 	all_entries = all_in_dir(curr_file, path_to_dir)
 	return [name for name in all_entries if not os.path.isdir(os.path.join(dir_path, name))]
 
 def all_dirs_from_dir(curr_file, path_to_dir):
+	'''
+	Similar to 'all_in_dir' but only returns directories.
+
+	Parameters
+	----------
+	curr_file : string
+		Absolute path to 'curr_file' is used as the base path
+	path_to_dir : string
+		Relative path from 'curr_file' to directory to read
+	'''
 	dir_path = file_path(curr_file, path_to_dir)
 	all_entries = all_in_dir(curr_file, path_to_dir)
 	return [name for name in all_entries if os.path.isdir(os.path.join(dir_path, name))]
 
-# finds all files in root direct 'path_to_dir' that contain name fragments in order
 def all_files_with_name_frags(curr_file, path_to_dir, name_frags, in_order=True):
+	'''
+	Composes 'all_files_from_dir' and 'filter_list_by_name_frags' to read all files from a directory and filter them
+
+	Parameters
+	----------
+	curr_file : string
+		Absolute path to 'curr_file' is used as the base path
+	path_to_dir : string
+		Relative path from 'curr_file' to directory to read
+	name_frags : list of strings
+		Name fragments that each file in specified directory must contain to be yielded
+	in_order : boolean
+		If true, files in specified directory must contain 'name_frags' in the order 'name_frags' specifies
+
+	Returns
+	-------
+	File names in specified directory that pass filtration
+	'''
 	if not isinstance(name_frags, list):
 		name_frags = [name_frags]
 	all_files = all_files_from_dir(curr_file, path_to_dir)
@@ -223,17 +290,63 @@ def all_files_with_name_frags(curr_file, path_to_dir, name_frags, in_order=True)
 
 # finds all directories in root direct 'path_to_dir' that contain name fragments in order
 def all_dirs_with_name_frags(curr_file, path_to_dir, name_frags, in_order=True):
+	'''
+	Composes 'all_dirs_from_dir' and 'filter_list_by_name_frags' to read all dirs from a directory and filter them
+
+	Parameters
+	----------
+	curr_file : string
+		Absolute path to 'curr_file' is used as the base path
+	path_to_dir : string
+		Relative path from 'curr_file' to directory to read
+	name_frags : list of strings
+		Name fragments that each dir in specified directory must contain to be yielded
+	in_order : boolean
+		If true, dirs in specified directory must contain 'name_frags' in the order 'name_frags' specifies
+
+	Returns
+	-------
+	Dir names in specified directory that pass filtration
+	'''
 	if not isinstance(name_frags, list):
 		name_frags = [name_frags]
 	all_dirs = all_dirs_from_dir(curr_file, path_to_dir)
 	return [d for d in filter_list_by_name_frags(all_dirs, name_frags, in_order=in_order)]
 
 def add_matrix(dest, mat):
+	'''
+	Adds matrix 'mat' to matrix 'dest' (in-place). Matrices must have the same dimension, but can be lists of lists.
+
+	Parameters
+	----------
+	dest : np.array or list of lists
+		Destination matrix
+	mat : np.array or list of lists
+		Matrix to add to 'dest'
+
+	Returns
+	-------
+	Nothing
+	'''
 	for i, l in enumerate(mat):
 		for j, item in enumerate(l):
 			dest[i][j] += item
 
 def normalize_matrix(mat, norming_factor):
+	'''
+	Normalizes matrix 'mat' in-place by 'norming_factor'
+
+	Parameters
+	----------
+	mat : np.array or list of lists
+		Matrix to be normalized in-place
+	norming_factor : float
+		Normalization factor
+
+	Returns
+	-------
+	Nothing
+	'''
 	for i, l in enumerate(mat):
 		for j, item in enumerate(l):
 			mat[i][j] /= norming_factor
@@ -421,4 +534,44 @@ def calc_bin_size_iter(target_bin_size, bin_size, growing=True):
         else:
             return calc_bin_size_iter(target_bin_size, 2 * bin_size)
 
+def collapse_and_average(df, to_collapse, to_average):
+    '''
+    Returns a collapsed copy of the provided DataFrame 'df'. For each unique value in the column specified by
+    to collapse, values of the columns specified by 'to_average' are analyzed for mean, std, and count.
+    
+    Parameters
+    ----------
+    df : Pandas DataFrame
+        DataFrame on which to run computations
+    to_collapse : string
+        Name of column to collapse by unique values
+    to_average : list of strings
+        Name of columns for which to compute mean, std, and count for each unique value of 'to_collapse'
+    
+    Returns
+    -------
+    Collapsed dataframe with statistics of 'to_average' added as additional columns
+    '''
+    try:
+        to_unique_vals
+        map_to_list
+    except NameError as ne:
+        print('Functions from utilities.utils are required.')
+        raise ne
 
+    rows = []
+    (unique_vals,) = to_unique_vals(df, [to_collapse])
+    for i, val in enumerate(unique_vals):
+        rows.append([val])
+        data_for_val = select(df, {to_collapse: val})
+        for col in to_average:
+            mean, std, count = data_for_val[col].mean(), data_for_val[col].std(), data_for_val[col].count()
+            rows[i].append(mean)
+            rows[i].append(std)
+            rows[i].append(count)
+    cols = [to_collapse]
+    for element in map_to_list(lambda c: [c + ' AVG', c + ' STD', c + ' COUNT'], to_average):
+        for col in element:
+            cols.append(col)
+    
+    return pd.DataFrame(data=rows, columns=cols)
