@@ -82,7 +82,7 @@ class SmartGraph:
 		else:
 			return setting
 
-	def plot(self, mode='scatter', x_axis_col, y_axis_col, err_bar_thickness=0.5, colors=None, err_bar_colors=None, labels=None, s=3, markers=None, facecolors=None):
+	def plot(self, x_axis_col, y_axis_col, mode='scatter', err_bar_thickness=0.5, colors=None, err_bar_colors=None, labels=None, s=3, markers=None, facecolors=None):
 		if mode in ['scatter', 'statistical']:
 			self.ax.clear()
 			colors = self.check_setting(colors, len(self.data), 'black')
