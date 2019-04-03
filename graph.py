@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 import numpy as np
-from utils import select, to_unique_vals
+from .utils import select, to_unique_vals
 
 class GraphManager:
 	def __init__(self, fig, ax):
@@ -60,6 +60,7 @@ class SmartGraph:
 		self.fig = fig
 		self.ax = ax
 		self.data = data
+		self.cache = {}
 
 	def run_statistics(self, x_axis_col, y_axis_col):
 		processed_data = []
@@ -68,7 +69,7 @@ class SmartGraph:
 			means = []
 			cis = []
 			for x_val in unique_vals:
-				y_vals = select(group, {x_axis_col: x_vall})[y_axis_col]
+				y_vals = select(group, {x_axis_col: x_val})[y_axis_col]
 				means.append(y_vals.mean())
 				cis.append(1.96 * y_vals.std() / np.sqrt(len(y_vals)))
 			processed_data.append({'x_vals': unique_vals, 'y_vals': means, 'y_cis': cis})
@@ -76,7 +77,7 @@ class SmartGraph:
 
 	def check_setting(self, setting, required_len, default):
 		if setting is None:
-			return [setting] * required_len
+			return [default] * required_len
 		elif len(setting) != required_len:
 			raise ValueError("Setting must be the 'required_len' %d" % required_len)
 		else:
@@ -91,12 +92,16 @@ class SmartGraph:
 
 			if mode == 'scatter':
 				for i, group in enumerate(self.data):
-					ax.scatter(group[x_axis_col], group[y_axis_col], c=colors[i], labels=labels[i], marker=markers[i], s=s, facecolors=facecolors)
+					self.ax.scatter(group[x_axis_col], group[y_axis_col], c=colors[i], label=labels[i], marker=markers[i], s=s, facecolors=facecolors)
 			else:
 				err_bar_colors = self.check_setting(err_bar_colors, len(self.data), 'black')
 				processed_data = self.run_statistics(x_axis_col, y_axis_col)
 				for i, group in enumerate(processed_data):
-					scatter(ax, group['x_vals'], None, group['y_vals'], group['y_cis'], err_bar_thickness=err_bar_thickness, color=colors[i], label=labels[i], marker=markers[i], s=s, facecolors=facecolors)
+					scatter(self.ax, group['x_vals'], None, group['y_vals'], group['y_cis'], err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color=err_bar_colors[i], label=labels[i], marker=markers[i], s=s, facecolors=facecolors)
+
+	def toggle():
+		pass
+		#todo
 
 # tableau20 colors borrowed from http://www.randalolson.com/2014/06/28/how-to-make-beautiful-data-visualizations-in-python-with-matplotlib/
 tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),    
