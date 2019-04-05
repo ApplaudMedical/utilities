@@ -6,6 +6,7 @@ import functools
 import numpy as np
 import multiprocessing as mp
 from scipy.interpolate import interp1d
+import pandas as pd
 
 def map_to_list(func, l):
 	'''
