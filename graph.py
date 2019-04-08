@@ -55,6 +55,10 @@ def scatter(ax, x, xerr, y, yerr, err_bar_thickness=0.5, color='black', err_bar_
 	ax.scatter(x, y, color=color, label=label, s=s, marker=marker, facecolors=color if facecolors is None else facecolors)
 	ax.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='none', color=err_bar_color, capsize=3, elinewidth=err_bar_thickness, capthick=err_bar_thickness)
 
+def bar(ax, x, x_widths, y, y_err, err_bar_thickness=0.5, color='black', err_bar_color='black', label='')
+	ax.errorbar(x, y, yerr=yerr, fmt='none', color=err_bar_color, capsize=3, elinewidth=err_bar_thickness, capthick=err_bar_thickness)
+	ax.bar(x, y, width=x_widths, color=color, label=label)
+
 class SmartGraph:
 	def __init__(self, fig, ax, data):
 		self.fig = fig
