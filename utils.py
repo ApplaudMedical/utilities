@@ -447,6 +447,9 @@ def mid_points(arr):
 		mids.append((arr[i] + arr[i+1])/2)
 	return mids
 
+def diffs(arr):
+	return [(arr[i+1] - arr[i]) for i in range(len(arr) - 1)]
+
 def pad_zeros(to_pad, length):
 	padded = str(to_pad)
 	while len(padded) < length:
@@ -505,7 +508,9 @@ def rebin(arr, new_dim):
 
 # returns a list of unique values in the given Pandas dataframe for each column name specified 
 def to_unique_vals(df, col_names):
-    return tuple([df[col_name].unique() for col_name in col_names])
+	if type(col_names) is str:
+		col_names = [col_names]
+	return tuple([df[col_name].unique() for col_name in col_names])
 
 # returns a subset of dataframe 
 def select(df, selection):
@@ -570,8 +575,9 @@ def collapse_and_average(df, to_collapse, to_average):
             rows[i].append(mean)
             rows[i].append(std)
             rows[i].append(count)
+            rows[i].append(std / np.sqrt(count) * 1.96)
     cols = [to_collapse]
-    for element in map_to_list(lambda c: [c + ' AVG', c + ' STD', c + ' COUNT'], to_average):
+    for element in map_to_list(lambda c: [c + ' AVG', c + ' STD', c + ' COUNT', c + ' CI'], to_average):
         for col in element:
             cols.append(col)
     

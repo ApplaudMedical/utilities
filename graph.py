@@ -24,9 +24,9 @@ class GraphManager:
 
 		for coord in coords:
 			if vertical:
-				self.ax.plot([coord] * len(points), points, '--', lw=0.5, color='black', alpha=0.3)
+				self.ax.plot([coord] * len(points), points, '--', lw=0.5, color='black', alpha=0.3, zorder=-1)
 			else:
-				self.ax.plot(points, [coord] * len(points), '--', lw=0.5, color='black', alpha=0.3)
+				self.ax.plot(points, [coord] * len(points), '--', lw=0.5, color='black', alpha=0.3, zorder=-1)
 
 def color_generator(colors):
 	c_idx = [0]
@@ -51,13 +51,14 @@ def gen_plot(fig=None, pos=111):
 
 	return (fig, ax, GraphManager(fig, ax))
 
-def scatter(ax, x, xerr, y, yerr, err_bar_thickness=0.5, color='black', err_bar_color='black', label='', s=3, marker=None, facecolors=None):
+def scatter(ax, x, xerr, y, yerr, err_bar_thickness=0.5, color='black', err_bar_color='black', label='', s=3, marker=None, facecolors=None, capsize=3):
 	ax.scatter(x, y, color=color, label=label, s=s, marker=marker, facecolors=color if facecolors is None else facecolors)
-	ax.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='none', color=err_bar_color, capsize=3, elinewidth=err_bar_thickness, capthick=err_bar_thickness)
+	ax.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='none', color=err_bar_color, elinewidth=err_bar_thickness, capthick=err_bar_thickness, capsize=capsize)
 
-def bar(ax, x, x_widths, y, yerr, err_bar_thickness=0.5, color='black', err_bar_color='black', label='')
-	ax.errorbar(x, y, yerr=yerr, fmt='none', color=err_bar_color, capsize=3, elinewidth=err_bar_thickness, capthick=err_bar_thickness)
-	ax.bar(x, y, width=x_widths, color=color, label=label)
+def bar(ax, x, x_widths, y, yerr, err_bar_thickness=0.5, color='black', edge_color=None, err_bar_color='black', label='', capsize=3):
+	ax.errorbar(x, y, yerr=yerr, fmt='none', color=err_bar_color, capsize=capsize, elinewidth=err_bar_thickness, capthick=err_bar_thickness)
+	edge_color = color if edge_color is None else edge_color
+	ax.bar(x, y, width=x_widths, color=color, label=label, edgecolor=edge_color, linewidth=0.7)
 
 class SmartGraph:
 	def __init__(self, fig, ax, data):
