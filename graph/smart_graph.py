@@ -1,6 +1,6 @@
 import numpy as np
-from .utils import select, to_unique_vals
-from methods import scatter
+from ..utils import select, to_unique_vals
+from .methods import scatter
 
 class SmartGraph:
 	def __init__(self, fig, ax, data):

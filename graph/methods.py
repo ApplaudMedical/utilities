@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 import numpy as np
+from .graph_manager import GraphManager
 
 def color_generator(colors, multiplicity=1):
 	c_idx = [0]
