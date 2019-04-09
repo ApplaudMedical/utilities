@@ -27,8 +27,16 @@ class GraphManager:
 			else:
 				self.ax.plot(points, [coord] * len(points), '--', lw=0.5, color='black', alpha=0.3)
 
-def color_generator(colors):
+def color_generator(colors, multiplicity=1):
 	c_idx = [0]
+	if multiplicity < 1 or not isinstance(multiplicity, int):
+		raise ValueError("'multiplicity' must be a int >=1")
+	if multiplicity != 1:
+		new_colors = []
+		for c in colors:
+			for j in range(multiplicity):
+				new_colors.append(c)
+		colors = new_colors
 	def gen():
 		col = colors[c_idx[0]]
 		c_idx[0] = (c_idx[0] + 1) % len(colors)
