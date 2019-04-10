@@ -514,77 +514,79 @@ def to_unique_vals(df, col_names):
 
 # returns a subset of dataframe 
 def select(df, selection):
-    criteria = []
-    for col in selection:
-        criteria.append(df[col] == selection[col])
-    return df[np.all(criteria, axis=0)]
+	criteria = []
+	for col in selection:
+		criteria.append(df[col] == selection[col])
+	return df[np.all(criteria, axis=0)]
 
 def format_number(number, sig_figs=3):
-    num = str(number)
-    count = len(num.strip('.'))
-    return num[:(-1 * (count - sig_figs - 1))]
+	num = str(number)
+	count = len(num.strip('.'))
+	return num[:(-1 * (count - sig_figs - 1))]
 
 def calc_bin_size(target_bin_size):
-    growing = target_bin_size > 1
-    return calc_bin_size_iter(target_bin_size, 1, growing)
+	growing = target_bin_size > 1
+	return calc_bin_size_iter(target_bin_size, 1, growing)
 
 def calc_bin_size_iter(target_bin_size, bin_size, growing=True):
-    if bin_size > target_bin_size:
-        if growing:
-            return bin_size / 2
-        else:
-            return calc_bin_size_iter(target_bin_size, bin_size / 2)
-    else:
-        if not growing:
-            return bin_size
-        else:
-            return calc_bin_size_iter(target_bin_size, 2 * bin_size)
+	if bin_size > target_bin_size:
+		if growing:
+			return bin_size / 2
+		else:
+			return calc_bin_size_iter(target_bin_size, bin_size / 2)
+	else:
+		if not growing:
+			return bin_size
+		else:
+			return calc_bin_size_iter(target_bin_size, 2 * bin_size)
 
 def collapse_and_average(df, to_preserve, to_average):
-    '''
-    Returns a collapsed copy of the provided DataFrame 'df'. For each unique value in the column specified by
-    to_preserve, values of the columns specified by 'to_average' are analyzed for mean, std, and count.
-    
-    Parameters
-    ----------
-    df : Pandas DataFrame
-        DataFrame on which to run computations
-    to_preserve : string or list of strings
-        Names of columns to collapse to combinations of unique values
-    to_average : list of strings
-        Name of columns for which to compute mean, std, and count for each unique value of 'to_preserve'
-    
-    Returns
-    -------
-    Collapsed dataframe with statistics of 'to_average' added as additional columns
-    '''
-    try:
-        to_unique_vals
-        map_to_list
-    except NameError as ne:
-        print('Functions from utilities.utils are required.')
-        raise ne
+	'''
+	Returns a collapsed copy of the provided DataFrame 'df'. For each unique value in the column specified by
+	to_preserve, values of the columns specified by 'to_average' are analyzed for mean, std, and count.
+	
+	Parameters
+	----------
+	df : Pandas DataFrame
+		DataFrame on which to run computations
+	to_preserve : string or list of strings
+		Names of columns to collapse to combinations of unique values
+	to_average : list of strings
+		Name of columns for which to compute mean, std, and count for each unique value of 'to_preserve'
+	
+	Returns
+	-------
+	Collapsed dataframe with statistics of 'to_average' added as additional columns
+	'''
+	try:
+		to_unique_vals
+		map_to_list
+	except NameError as ne:
+		print('Functions from utilities.utils are required.')
+		raise ne
 
-    to_preserve = [to_preserve] if type(to_preserve) is str else to_preserve
+	to_preserve = [to_preserve] if type(to_preserve) is str else to_preserve
 
-    rows = []
-    unique_vals = list(to_unique_vals(df, to_preserve))
-    num_to_preserve = len(unique_vals)
-    all_combinations = cartesian(unique_vals)
-    print(all_combinations)
+	rows = []
+	unique_vals = list(to_unique_vals(df, to_preserve))
+	num_to_preserve = len(unique_vals)
+	all_combinations = cartesian(*unique_vals)
 
-    for i, val in enumerate(unique_vals):
-        rows.append([val])
-        data_for_val = select(df, {to_preserve: val})
-        for col in to_average:
-            mean, std, count = data_for_val[col].mean(), data_for_val[col].std(), data_for_val[col].count()
-            rows[i].append(mean)
-            rows[i].append(std)
-            rows[i].append(count)
-            rows[i].append(std / np.sqrt(count) * 1.96)
-    cols = [to_preserve]
-    for element in map_to_list(lambda c: [c + ' AVG', c + ' STD', c + ' COUNT', c + ' CI'], to_average):
-        for col in element:
-            cols.append(col)
-    
-    return pd.DataFrame(data=rows, columns=cols)
+	for i, combination in enumerate(zip(*all_combinations)):
+		rows.append(list(combination))
+		selection = {}
+		for j, p_col in enumerate(to_preserve):
+			selection[p_col] = combination[j]
+			data_for_val = select(df, selection)
+		for col in to_average:
+			mean, std, count = data_for_val[col].mean(), data_for_val[col].std(), data_for_val[col].count()
+			rows[i].append(mean)
+			rows[i].append(std)
+			rows[i].append(count)
+			rows[i].append(std / np.sqrt(count) * 1.96)
+	cols = to_preserve[:]
+	for element in map_to_list(lambda c: [c + ' AVG', c + ' STD', c + ' COUNT', c + ' CI'], to_average):
+		for col in element:
+			cols.append(col)
+	
+	return pd.DataFrame(data=rows, columns=cols)
