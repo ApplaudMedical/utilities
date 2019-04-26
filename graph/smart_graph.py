@@ -1,5 +1,5 @@
 import numpy as np
-from ..utils import select, to_unique_vals
+from ..utils import select, to_unique_vals, map_to_list
 from .methods import scatter, bar
 from functools import reduce
 
