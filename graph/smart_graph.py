@@ -1,7 +1,6 @@
 import numpy as np
 from ..utils import select, to_unique_vals
 from .methods import scatter, bar
-from sets import Set
 from functools import reduce
 
 class SmartGraph:
@@ -55,7 +54,7 @@ class SmartGraph:
 				processed_data = self.run_statistics(x_axis_col, y_axis_col)
 				num_groups = len(processed_data)
 
-				all_x_vals = map_to_list(lambda grp: Set(grp['x_vals']), processed_data)
+				all_x_vals = map_to_list(lambda grp: set(grp['x_vals']), processed_data)
 				all_x_vals = [val for val in sorted(reduce(lambda x, y: x.Union(y), all_x_vals))]
 
 				for i, group in enumerate(processed_data):
