@@ -55,26 +55,20 @@ class SmartGraph:
 				num_groups = len(processed_data)
 
 				all_x_vals = map_to_list(lambda grp: set(grp['x_vals']), processed_data)
-				all_x_vals = [val for val in sorted(reduce(lambda x, y: x.Union(y), all_x_vals))]
+				all_x_vals = list([val for val in sorted(reduce(lambda x, y: x.union(y), all_x_vals))])
 
 				for i, group in enumerate(processed_data):
-					y_vals = []
-					y_cis = []
-
+					spaced_x_vals = []
 					grp_x_val_idx = 0
-					for j, x in all_x_vals:
-						if x == group['x_vals'][grp_x_val_idx]:
+					for j, x in enumerate(all_x_vals):
+						if grp_x_val_idx < len(group['x_vals']) and x == group['x_vals'][grp_x_val_idx]:
+							spaced_x_vals.append(j)
 							grp_x_val_idx += 1
-							y_vals.append(group['y_vals'][grp_x_val_idx])
-							y_cis.append(group['y_cis'][grp_x_val_idx])
-						else:
-							y_vals.append(None)
-							y_cis.append(None)
 
-					bar(self.ax, [(num_groups * j + i) + 0.5 for j in range(len(all_x_vals))], 1, y_vals, y_cis, err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color='black', label=labels[i])
-				self.ax.set_xlim(0, largest_group_len * num_groups)
+					bar(self.ax, [(num_groups * k + i) + 0.5 for k in spaced_x_vals], 1, group['y_vals'], group['y_cis'], err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color='black', label=labels[i])
+				self.ax.set_xlim(0, len(all_x_vals) * num_groups)
 				self.ax.set_ylim(0)
-				self.ax.set_xticks([(float(num_groups) * (i + 0.5)) for i in range(largest_group_len)])
+				self.ax.set_xticks([(float(num_groups) * (i + 0.5)) for i in range(len(all_x_vals))])
 				self.ax.set_xticklabels(all_x_vals)
 
 	def toggle():
