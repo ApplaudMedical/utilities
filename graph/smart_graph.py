@@ -1,6 +1,8 @@
 import numpy as np
 from ..utils import select, to_unique_vals
 from .methods import scatter, bar
+from sets import Set
+from functools import reduce
 
 class SmartGraph:
 	def __init__(self, fig, ax, data):
@@ -53,18 +55,28 @@ class SmartGraph:
 				processed_data = self.run_statistics(x_axis_col, y_axis_col)
 				num_groups = len(processed_data)
 
-				largest_group_len = 0
-				largest_group = None
+				all_x_vals = map_to_list(lambda grp: Set(grp['x_vals']), processed_data)
+				all_x_vals = [val for val in sorted(reduce(lambda x, y: x.Union(y), all_x_vals))]
+
 				for i, group in enumerate(processed_data):
-					group_len = len(group['x_vals'])
-					if group_len > largest_group_len:
-						largest_group_len = group_len
-						largest_group = group
-					bar(self.ax, [(num_groups * j + i) + 0.5 for j in range(group_len)], 1, group['y_vals'], group['y_cis'], err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color='black', label=labels[i])
+					y_vals = []
+					y_cis = []
+
+					grp_x_val_idx = 0
+					for j, x in all_x_vals:
+						if x == group['x_vals'][grp_x_val_idx]:
+							grp_x_val_idx += 1
+							y_vals.append(group['y_vals'][grp_x_val_idx])
+							y_cis.append(group['y_cis'][grp_x_val_idx])
+						else:
+							y_vals.append(None)
+							y_cis.append(None)
+
+					bar(self.ax, [(num_groups * j + i) + 0.5 for j in range(len(all_x_vals))], 1, y_vals, y_cis, err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color='black', label=labels[i])
 				self.ax.set_xlim(0, largest_group_len * num_groups)
 				self.ax.set_ylim(0)
 				self.ax.set_xticks([(float(num_groups) * (i + 0.5)) for i in range(largest_group_len)])
-				self.ax.set_xticklabels(group['x_vals'])
+				self.ax.set_xticklabels(all_x_vals)
 
 	def toggle():
 		pass
