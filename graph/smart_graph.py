@@ -34,6 +34,11 @@ class SmartGraph:
 		else:
 			return setting
 
+	def set_bounds(self):
+		x, y = (self.ax.get_xaxis(), self.ax.get_yaxis())
+		self.ax.set_xlim(x.get_ticklocs()[0], x.get_ticklocs()[-1])
+		self.ax.set_ylim(y.get_ticklocs()[0], y.get_ticklocs()[-1])
+
 	def plot(self, x_axis_col, y_axis_col, mode='scatter', err_bar_thickness=0.5, colors=None, err_bar_colors=None, labels=None, s=3, markers=None, facecolors=None):
 		if mode in ['scatter', 'statistical', 'bar']:
 			self.ax.clear()
@@ -44,11 +49,14 @@ class SmartGraph:
 			if mode == 'scatter':
 				for i, group in enumerate(self.data):
 					self.ax.scatter(group[x_axis_col], group[y_axis_col], c=colors[i], label=labels[i], marker=markers[i], s=s, facecolors=facecolors)
+				self.set_bounds()
 			elif mode == 'statistical':
 				err_bar_colors = self.check_setting(err_bar_colors, len(self.data), 'black')
 				processed_data = self.run_statistics(x_axis_col, y_axis_col)
 				for i, group in enumerate(processed_data):
 					scatter(self.ax, group['x_vals'], None, group['y_vals'], group['y_cis'], err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color=err_bar_colors[i], label=labels[i], marker=markers[i], s=s, facecolors=facecolors)
+				x, y = (self.ax.get_xaxis(), self.ax.get_yaxis())
+				self.set_bounds()
 			else:
 				err_bar_colors = self.check_setting(err_bar_colors, len(self.data), 'black')
 				processed_data = self.run_statistics(x_axis_col, y_axis_col)
