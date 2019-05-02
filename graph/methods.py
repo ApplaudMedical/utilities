@@ -18,7 +18,7 @@ def color_generator(colors, multiplicity=1):
 		return col
 	return gen
 
-def gen_plot(fig=None, pos=111, scale=3.):
+def gen_plot(fig=None, pos=111, scale=8.):
 	gr = 1.62
 	if fig is None:
 		fig = plt.figure(figsize=(scale * gr, scale))
