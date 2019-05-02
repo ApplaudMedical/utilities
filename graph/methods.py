@@ -18,9 +18,10 @@ def color_generator(colors, multiplicity=1):
 		return col
 	return gen
 
-def gen_plot(fig=None, pos=111):
+def gen_plot(fig=None, pos=111, scale=3.):
+	gr = 1.62
 	if fig is None:
-		fig = plt.figure()
+		fig = plt.figure(figsize=(scale * gr, scale))
 	ax = fig.add_subplot(pos)
 
 	# remove top and right lines on graph
