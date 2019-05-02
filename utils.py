@@ -478,13 +478,11 @@ def map_parallel(func, args_list, cores=None):
 	results = []
 
 	for completed in range(0, len(args_list), cores):
-		#print('Created pool')
 		pool = mp.Pool(cores)
 		partial_results = pool.map(func_wrapper, args_list_with_func[completed:(completed + cores)])
 		pool.close()
 		pool.join()
 		results.append(partial_results)
-		#print('Closed pool')
 	results = [res for partial_results in results for res in partial_results]
 	return results
 
