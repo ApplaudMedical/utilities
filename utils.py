@@ -122,7 +122,6 @@ def read_csv(curr_file, rel_path, num_to_discard=0, delimiter=',', preprocess=No
 				continue
 			if preprocess is not None:
 				row = preprocess(row)
-				row = [row[i] for i in range(len(row)) if i % sample_every == 0]
 			yield row
 		data_file.close()
 
@@ -353,6 +352,26 @@ def normalize_matrix(mat, norming_factor):
 			mat[i][j] /= norming_factor
 
 def read_matrix_file(curr_file, path, name=None, sample_every=1, num_to_discard=0, discarded=None):
+	'''
+	Reads a csv as a matrix in which the entries are floats.
+
+	Parameters
+	----------
+	curr_file : string
+		Absolute path to 'curr_file' is used as the base path
+	path : string
+		Relative path from 'curr_file' to file to read
+	sample_every : int
+		Only keep every 'sample_every'th row of csv
+	num_to_discard : int
+		Discard first 'num_to_discard' rows of csv
+	discarded : list
+		Provided reference to a list to preserve discarded rows
+
+	Returns
+	-------
+	Generator that returns processed rows
+	'''
 	path = os.path.join(path, name) if name is not None else path
 	return read_csv(curr_file, path, preprocess=preprocess, sample_every=sample_every, num_to_discard=num_to_discard, discarded=discarded)
 
@@ -362,6 +381,26 @@ def read_matrix_file(curr_file, path, name=None, sample_every=1, num_to_discard=
 # returns (averaged arrays, files that were filtered out)
 # if 'files' is None, does the same operation, but 'files' becomes all files found in 'path_to_dir'
 def average_files(curr_file, path_to_dir, name_frags=[], files=None, print_on=False):
+	'''
+	Averages CSVs
+
+	Parameters
+	----------
+	curr_file : string
+		Absolute path to 'curr_file' is used as the base path
+	path_to_dir : string
+		Relative path from 'curr_file' to directory to read
+	name_frags : list of strings
+		If 'files' is None, all files in the dir specified by 'path_to_dir' are filtered by 'name_frags' through 'all_files_with_name_frags'.
+		If 'files' is a list of strings, it is filtered by 'name_frags' in accordance with 'filter_list_by_name_frags'.
+	files : list of strings
+		If specified, this list of file names is filtered by 'name_frags'. All names should be found within the directory specified by 'path_to_dir'
+
+	Returns
+	-------
+	Returns a tuple of (list of lists, list)
+	First list is the averaged CSVs, and the second is the filtered file list.
+	'''
 	if files is None:
 		files = all_files_with_name_frags(curr_file, path_to_dir, name_frags)
 	else:
