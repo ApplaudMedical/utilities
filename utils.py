@@ -30,7 +30,11 @@ def file_path(curr_file, *path_elements):
 	curr_file : string
 	*path_elements : strings
 	'''
-	direc = os.path.dirname(os.path.abspath(curr_file))
+	curr_path = os.path.abspath(curr_file)
+	if os.path.isfile(curr_path):
+		direc = os.path.dirname(curr_path)
+	else:
+		direc = curr_path
 	return os.path.join(direc, *path_elements)
 
 def open_file(curr_file, rel_path, protocol='r'):
