@@ -77,7 +77,6 @@ class SmartGraph:
 					x_vals_for_group = [((num_groups + x_group_padding) * k + i + 0.5) for k in spaced_x_vals]
 					bar(self.ax, x_vals_for_group, 0.99, group['y_vals'], group['y_cis'], err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color='black', label=labels[i])
 				self.ax.set_xlim(0, len(all_x_vals) * (num_groups) + (len(all_x_vals) - 1) * x_group_padding)
-				self.ax.set_ylim(0)
 				self.ax.set_xticks([(float(num_groups) * (i + 0.5) + i * x_group_padding) for i in range(len(all_x_vals))])
 				self.ax.set_xticklabels(all_x_vals)
 
