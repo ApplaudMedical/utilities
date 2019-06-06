@@ -1,6 +1,11 @@
 from matplotlib import pyplot as plt
 import numpy as np
 from .graph_manager import GraphManager
+from textwrap import wrap
+from ..utils import map_to_list
+
+def wrap_names(names, n=12):
+	return map_to_list(lambda name: '\n'.join(wrap(name, n)), names)
 
 def color_generator(colors, multiplicity=1):
 	c_idx = [0]
@@ -42,6 +47,8 @@ def bar(ax, x, x_widths, y, yerr, err_bar_thickness=0.5, color='black', edge_col
 	edge_color = color if edge_color is None else edge_color
 	ax.bar(x, y, width=x_widths, color=color, label=label, edgecolor=edge_color, linewidth=0.7)
 	ax.errorbar(x, y, yerr=yerr, fmt='none', color=err_bar_color, capsize=capsize, elinewidth=err_bar_thickness, capthick=err_bar_thickness)
+
+
 
 
 # tableau20 colors borrowed from http://www.randalolson.com/2014/06/28/how-to-make-beautiful-data-visualizations-in-python-with-matplotlib/
