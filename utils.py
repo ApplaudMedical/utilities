@@ -534,9 +534,17 @@ def t_test(group_1, group_2):
 	group_2 = np.array(group_2)
 	mean_1 = np.mean(group_1)
 	mean_2 = np.mean(group_2)
-	std_1 = np.std(group_1)
-	std_2 = np.std(group_2)
-	return abs(mean_1 - mean_2) / np.sqrt(std_1**2 / len(group_1) + std_2**2 / len(group_2))
+	std_1 = np.std(group_1, ddof=1)
+	std_2 = np.std(group_2, ddof=1)
+
+	var_div_by_len_1 = np.square(std_1) / len(group_1)
+	var_div_by_len_2 = np.square(std_2) / len(group_2)
+
+	t_val = abs(mean_1 - mean_2) / np.sqrt(var_div_by_len_1 + var_div_by_len_2)
+
+	dof = (var_div_by_len_1 + var_div_by_len_2)**2 / ((var_div_by_len_1**2 / (len(group_1) - 1)) + (var_div_by_len_2**2 / (len(group_2) - 1)))
+
+	return t_val, dof
 
 def confidence_interval(x, z=2.58):
 	return z * np.std(x) / len(x)
@@ -553,7 +561,7 @@ def to_unique_vals(df, col_names):
 		col_names = [col_names]
 	return tuple([df[col_name].unique() for col_name in col_names])
 
-# returns a subset of dataframe 
+# returns a subset of dataframe
 def select(df, selection):
 	criteria = []
 	for col in selection:
@@ -620,7 +628,7 @@ def collapse_and_average(df, to_preserve, to_average):
 			selection[p_col] = combination[j]
 			data_for_val = select(df, selection)
 		for col in to_average:
-			mean, std, count = data_for_val[col].mean(), data_for_val[col].std(), data_for_val[col].count()
+			mean, std, count = data_for_val[col].mean(), data_for_val[col].std(ddof=1), data_for_val[col].count()
 			rows[i].append(mean)
 			rows[i].append(std)
 			rows[i].append(count)
