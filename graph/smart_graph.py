@@ -13,8 +13,9 @@ class SmartGraph:
 	def run_statistics_for_group(self, group, y_axis_col):
 		y_vals = group[y_axis_col]
 		std = y_vals.std()
-		ci = 1.96 * std / np.sqrt(len(y_vals))
-		return y_vals.mean(), ci, std
+		std_err = std / np.sqrt(len(y_vals))
+		ci = 1.96 * std_err
+		return y_vals.mean(), ci, std, std_err
 
 	def run_statistics(self, x_axis_col, y_axis_col):
 		processed_data = []
@@ -22,22 +23,25 @@ class SmartGraph:
 			means = []
 			cis = []
 			stds = []
+			std_errs = []
 
 			if x_axis_col is not None:
 				unique_vals, = to_unique_vals(group, [x_axis_col])
 				unique_vals = [val for val in sorted(unique_vals)]
 				for x_val in unique_vals:
-					mean, ci, std = self.run_statistics_for_group(select(group, {x_axis_col: x_val}), y_axis_col)
+					mean, ci, std, std_err = self.run_statistics_for_group(select(group, {x_axis_col: x_val}), y_axis_col)
 					means.append(mean)
 					cis.append(ci)
 					stds.append(std)
+					std_errs.append(std_err)
 			else:
-				mean, ci, std = self.run_statistics_for_group(group, y_axis_col)
+				mean, ci, std, std_err = self.run_statistics_for_group(group, y_axis_col)
 				means.append(mean)
 				cis.append(ci)
 				stds.append(std)
+				std_errs.append(std_err)
 
-			stats_for_group = {'y_vals': means, 'y_cis': cis, 'y_stds': stds}
+			stats_for_group = {'y_vals': means, 'y_cis': cis, 'y_stds': stds, 'y_std_errs': std_errs}
 			if x_axis_col is not None:
 				stats_for_group['x_vals'] = unique_vals
 			processed_data.append(stats_for_group)
@@ -59,9 +63,9 @@ class SmartGraph:
 	def set_errbar_type(self, errbar_type):
 		if errbar_type == 'ci':
 			return 'y_cis'
-		elif errbar_type == 'std':
-			return 'y_stds'
-		raise ValueError("'errbar_type' should be 'ci' or 'std'")
+		elif errbar_type == 'std_err':
+			return 'y_std_errs'
+		raise ValueError("'errbar_type' should be 'ci' or 'std_err'")
 
 	def plot(self, x_axis_col, y_axis_col, mode='scatter', err_bar_thickness=0.5, colors=None, err_bar_colors=None, labels=None, s=3, markers=None, facecolors=None, errbar_type='ci'):
 		if mode in ['scatter', 'statistical', 'bar']:
