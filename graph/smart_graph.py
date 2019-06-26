@@ -56,7 +56,14 @@ class SmartGraph:
 		self.ax.set_xlim(x.get_ticklocs()[0], x.get_ticklocs()[-1])
 		self.ax.set_ylim(y.get_ticklocs()[0], y.get_ticklocs()[-1])
 
-	def plot(self, x_axis_col, y_axis_col, mode='scatter', err_bar_thickness=0.5, colors=None, err_bar_colors=None, labels=None, s=3, markers=None, facecolors=None):
+	def set_errbar_type(self, errbar_type):
+		if errbar_type == 'ci':
+			return 'y_cis'
+		elif errbar_type == 'std':
+			return 'y_stds'
+		raise ValueError("'errbar_type' should be 'ci' or 'std'")
+
+	def plot(self, x_axis_col, y_axis_col, mode='scatter', err_bar_thickness=0.5, colors=None, err_bar_colors=None, labels=None, s=3, markers=None, facecolors=None, errbar_type='ci'):
 		if mode in ['scatter', 'statistical', 'bar']:
 			self.ax.clear()
 			colors = self.check_setting(colors, len(self.data), 'black')
@@ -70,8 +77,9 @@ class SmartGraph:
 			elif mode == 'statistical':
 				err_bar_colors = self.check_setting(err_bar_colors, len(self.data), 'black')
 				processed_data = self.run_statistics(x_axis_col, y_axis_col)
+				errbar_type = self.set_errbar_type(errbar_type)
 				for i, group in enumerate(processed_data):
-					scatter(self.ax, group['x_vals'], None, group['y_vals'], group['y_cis'], err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color=err_bar_colors[i], label=labels[i], marker=markers[i], s=s, facecolors=facecolors)
+					scatter(self.ax, group['x_vals'], None, group['y_vals'], group[errbar_type], err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color=err_bar_colors[i], label=labels[i], marker=markers[i], s=s, facecolors=facecolors)
 				x, y = (self.ax.get_xaxis(), self.ax.get_yaxis())
 				self.set_bounds()
 			else:
@@ -79,6 +87,8 @@ class SmartGraph:
 				err_bar_colors = self.check_setting(err_bar_colors, len(self.data), 'black')
 				processed_data = self.run_statistics(x_axis_col, y_axis_col)
 				num_groups = len(processed_data)
+
+				errbar_type = self.set_errbar_type(errbar_type)
 
 				if x_axis_col is not None:
 					all_x_vals = map_to_list(lambda grp: set(grp['x_vals']), processed_data)
@@ -102,7 +112,7 @@ class SmartGraph:
 						x_vals_for_group = [((num_groups + x_group_padding) * k + i + 0.5) for k in spaced_x_vals]
 					else:
 						x_vals_for_group = [i + 0.5]
-					bar(self.ax, x_vals_for_group, 0.99, group['y_vals'], group['y_cis'], err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color='black', label=labels[i])
+					bar(self.ax, x_vals_for_group, 0.99, group['y_vals'], group[errbar_type], err_bar_thickness=err_bar_thickness, color=colors[i], err_bar_color='black', label=labels[i])
 
 	def toggle():
 		pass
