@@ -12,7 +12,7 @@ class SmartGraph:
 
 	def run_statistics_for_group(self, group, y_axis_col):
 		y_vals = group[y_axis_col]
-		std = y_vals.std()
+		std = y_vals.std(ddof=1)
 		ci = 1.96 * std / np.sqrt(len(y_vals))
 		return y_vals.mean(), ci, std
 
